@@ -6,8 +6,8 @@ import { Readable } from 'stream';
 import { getSetCookiesFromResponse } from '../core/cookies/index.js';
 import { getViteErrorPayload } from '../core/errors/dev/index.js';
 import notFoundTemplate from '../template/4xx.js';
-import type { AstroConfig } from '#astro/@types/astro';
-import { createAssetLink } from '#astro/core/render/ssr-element';
+import type { AstroConfig } from '../@types/astro.js';
+import { createAssetLink } from '../core/render/ssr-element.js';
 
 export async function handle404Response(
 	origin: string,
@@ -29,7 +29,7 @@ export async function handle500Response(
 	loader: ModuleLoader,
 	res: http.ServerResponse,
 	err: ErrorWithMetadata,
-	base: AstroConfig['base'],
+	base: AstroConfig['base']
 ) {
 	res.on('close', async () =>
 		setTimeout(async () => loader.webSocketSend(await getViteErrorPayload(err)), 200)

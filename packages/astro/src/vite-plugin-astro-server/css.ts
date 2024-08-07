@@ -1,5 +1,5 @@
-import type { AstroConfig } from '#astro/@types/astro';
-import { createAssetLink } from '#astro/core/render/ssr-element';
+import type { AstroConfig } from '../@types/astro.js';
+import { createAssetLink } from '../core/render/ssr-element.js';
 import type { ModuleLoader } from '../core/module-loader/index.js';
 import { viteID } from '../core/util.js';
 import { isBuildableCSSRequest } from './util.js';
@@ -15,7 +15,7 @@ interface ImportedStyle {
 export async function getStylesForURL(
 	filePath: URL,
 	loader: ModuleLoader,
-	base: AstroConfig['base'],
+	base: AstroConfig['base']
 ): Promise<{ urls: Set<string>; styles: ImportedStyle[]; crawledFiles: Set<string> }> {
 	const importedCssUrls = new Set<string>();
 	// Map of url to injected style object. Use a `url` key to deduplicate styles
