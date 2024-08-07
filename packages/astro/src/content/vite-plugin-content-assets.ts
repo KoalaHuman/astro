@@ -68,7 +68,7 @@ export function astroContentAssetPropagationPlugin({
 						styles,
 						urls,
 						crawledFiles: styleCrawledFiles,
-					} = await getStylesForURL(pathToFileURL(basePath), devModuleLoader);
+					} = await getStylesForURL(pathToFileURL(basePath), devModuleLoader, settings.config.base);
 
 					// Add hoisted script tags, skip if direct rendering with `directRenderScript`
 					const { scripts: hoistedScripts, crawledFiles: scriptCrawledFiles } = settings.config
@@ -77,7 +77,8 @@ export function astroContentAssetPropagationPlugin({
 						: await getScriptsForURL(
 								pathToFileURL(basePath),
 								settings.config.root,
-								devModuleLoader
+								devModuleLoader,
+								settings.config.base,
 							);
 
 					// Register files we crawled to be able to retrieve the rendered styles and scripts,

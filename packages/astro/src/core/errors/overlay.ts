@@ -652,7 +652,7 @@ class ErrorOverlay extends HTMLElement {
 
 				const editorLink = this.createLink(`Open in editor${openNewWindowIcon}`, undefined);
 				editorLink.onclick = () => {
-					fetch('/__open-in-editor?file=' + encodeURIComponent(absoluteFileLocation));
+					fetch(import.meta.env.BASE_URL + '__open-in-editor?file=' + encodeURIComponent(absoluteFileLocation));
 				};
 
 				codeHeader.appendChild(editorLink);

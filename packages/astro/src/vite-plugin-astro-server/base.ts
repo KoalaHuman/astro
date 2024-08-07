@@ -17,7 +17,6 @@ export function baseMiddleware(
 	const site = config.site ? new URL(config.base, config.site) : undefined;
 	const devRootURL = new URL(config.base, 'http://localhost');
 	const devRoot = site ? site.pathname : devRootURL.pathname;
-	const devRootReplacement = devRoot.endsWith('/') ? '/' : '';
 
 	return function devBaseMiddleware(req, res, next) {
 		const url = req.url!;
@@ -31,7 +30,6 @@ export function baseMiddleware(
 		}
 
 		if (pathname.startsWith(devRoot)) {
-			req.url = url.replace(devRoot, devRootReplacement);
 			return next();
 		}
 

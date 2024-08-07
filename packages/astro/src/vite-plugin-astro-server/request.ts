@@ -72,7 +72,7 @@ export async function handleRequest({
 		},
 		onError(_err) {
 			const { error, errorWithMetadata } = recordServerError(loader, config, pipeline, _err);
-			handle500Response(loader, incomingResponse, errorWithMetadata);
+			handle500Response(loader, incomingResponse, errorWithMetadata, config.base);
 			return error;
 		},
 	});

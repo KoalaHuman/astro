@@ -163,11 +163,11 @@ export default {
 					async clickAction() {
 						// NOTE: The path here has to be absolute and without any errors (no double slashes etc)
 						// or Vite will silently fail to open the file. Quite annoying.
-						await fetch(
-							'/__open-in-editor?file=' +
+						await fetch(import.meta.env.BASE_URL + 
+							'__open-in-editor?file=' +
 								encodeURIComponent(
 									(window as DevToolbarMetadata).__astro_dev_toolbar__.root +
-										islandComponentPath.slice(1)
+										islandComponentPath.replace(import.meta.env.BASE_URL, '')
 								)
 						);
 					},

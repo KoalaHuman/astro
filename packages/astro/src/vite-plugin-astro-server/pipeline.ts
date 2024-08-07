@@ -27,6 +27,7 @@ import { getStylesForURL } from './css.js';
 import { getComponentMetadata } from './metadata.js';
 import { createResolve } from './resolve.js';
 import { getScriptsForURL } from './scripts.js';
+import { createModuleScriptElementWithSrc, createAssetLink } from '../core/render/ssr-element.js';
 
 export class DevPipeline extends Pipeline {
 	// renderers are loaded on every request,
@@ -49,7 +50,7 @@ export class DevPipeline extends Pipeline {
 		readonly defaultRoutes = createDefaultRoutes(manifest)
 	) {
 		const mode = 'development';
-		const resolve = createResolve(loader, config.root);
+		const resolve = createResolve(loader, config.root, config.base);
 		const serverLike = isServerLikeOutput(config);
 		const streaming = true;
 		super(logger, manifest, mode, [], resolve, serverLike, streaming);
@@ -73,30 +74,28 @@ export class DevPipeline extends Pipeline {
 
 	async headElements(routeData: RouteData): Promise<HeadElements> {
 		const {
-			config: { root },
+			config: { root, base },
 			loader,
 			mode,
 			settings,
 		} = this;
+
 		const filePath = new URL(`${routeData.component}`, root);
 		// Add hoisted script tags, skip if direct rendering with `directRenderScript`
 		const { scripts } = settings.config.experimental.directRenderScript
 			? { scripts: new Set<SSRElement>() }
-			: await getScriptsForURL(filePath, settings.config.root, loader);
+			: await getScriptsForURL(filePath, settings.config.root, loader, base);
 
 		// Inject HMR scripts
 		if (isPage(filePath, settings) && mode === 'development') {
-			scripts.add({
-				props: { type: 'module', src: '/@vite/client' },
-				children: '',
-			});
+			scripts.add(createModuleScriptElementWithSrc('/@vite/client', base));
 
 			if (
 				settings.config.devToolbar.enabled &&
 				(await settings.preferences.get('devToolbar.enabled'))
 			) {
 				const src = await resolveIdToUrl(loader, 'astro/runtime/client/dev-toolbar/entrypoint.js');
-				scripts.add({ props: { type: 'module', src }, children: '' });
+				scripts.add(createModuleScriptElementWithSrc(src, base));
 
 				const additionalMetadata: DevToolbarMetadata['__astro_dev_toolbar__'] = {
 					root: fileURLToPath(settings.config.root),
@@ -119,16 +118,13 @@ export class DevPipeline extends Pipeline {
 					children: script.content,
 				});
 			} else if (script.stage === 'page' && isPage(filePath, settings)) {
-				scripts.add({
-					props: { type: 'module', src: `/@id/${PAGE_SCRIPT_ID}` },
-					children: '',
-				});
+				scripts.add(createModuleScriptElementWithSrc(`/@id/${PAGE_SCRIPT_ID}`, base))
 			}
 		}
 
 		// Pass framework CSS in as style tags to be appended to the page.
 		const links = new Set<SSRElement>();
-		const { urls, styles: _styles } = await getStylesForURL(filePath, loader);
+		const { urls, styles: _styles } = await getStylesForURL(filePath, loader, base);
 		for (const href of urls) {
 			links.add({ props: { rel: 'stylesheet', href }, children: '' });
 		}

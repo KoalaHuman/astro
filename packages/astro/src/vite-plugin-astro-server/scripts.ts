@@ -1,4 +1,4 @@
-import type { SSRElement } from '../@types/astro.js';
+import type { AstroConfig, SSRElement } from '../@types/astro.js';
 import type { ModuleInfo, ModuleLoader } from '../core/module-loader/index.js';
 import { createModuleScriptElementWithSrc } from '../core/render/ssr-element.js';
 import { viteID } from '../core/util.js';
@@ -9,13 +9,14 @@ import { crawlGraph } from './vite.js';
 export async function getScriptsForURL(
 	filePath: URL,
 	root: URL,
-	loader: ModuleLoader
+	loader: ModuleLoader,
+	base: AstroConfig['base'],
 ): Promise<{ scripts: Set<SSRElement>; crawledFiles: Set<string> }> {
 	const elements = new Set<SSRElement>();
 	const crawledFiles = new Set<string>();
 	const rootID = viteID(filePath);
 	const modInfo = loader.getModuleInfo(rootID);
-	addHoistedScripts(elements, modInfo, root);
+	addHoistedScripts(elements, modInfo, root, base);
 	for await (const moduleNode of crawlGraph(loader, rootID, true)) {
 		if (moduleNode.file) {
 			crawledFiles.add(moduleNode.file);
@@ -23,14 +24,14 @@ export async function getScriptsForURL(
 		const id = moduleNode.id;
 		if (id) {
 			const info = loader.getModuleInfo(id);
-			addHoistedScripts(elements, info, root);
+			addHoistedScripts(elements, info, root, base);
 		}
 	}
 
 	return { scripts: elements, crawledFiles };
 }
 
-function addHoistedScripts(set: Set<SSRElement>, info: ModuleInfo | null, root: URL) {
+function addHoistedScripts(set: Set<SSRElement>, info: ModuleInfo | null, root: URL, base: AstroConfig['base']) {
 	if (!info?.meta?.astro) {
 		return;
 	}
@@ -40,7 +41,7 @@ function addHoistedScripts(set: Set<SSRElement>, info: ModuleInfo | null, root: 
 	for (let i = 0; i < astro.scripts.length; i++) {
 		let scriptId = `${id}?astro&type=script&index=${i}&lang.ts`;
 		scriptId = rootRelativePath(root, scriptId);
-		const element = createModuleScriptElementWithSrc(scriptId);
+		const element = createModuleScriptElementWithSrc(scriptId, base);
 		set.add(element);
 	}
 }

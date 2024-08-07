@@ -85,7 +85,7 @@ function buildAuditTooltip(rule: ResolvedAuditRule, element: Element) {
 			async clickAction() {
 				// NOTE: The path here has to be absolute and without any errors (no double slashes etc)
 				// or Vite will silently fail to open the file. Quite annoying.
-				await fetch('/__open-in-editor?file=' + encodeURIComponent(elementFileWithPosition));
+				await fetch(import.meta.env.BASE_URL + '__open-in-editor?file=' + encodeURIComponent(elementFileWithPosition));
 			},
 		});
 	}
